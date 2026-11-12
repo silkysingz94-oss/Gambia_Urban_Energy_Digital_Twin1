@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GBoS GEOAI | Gambia Urban Energy Intelligence</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -13,1172 +13,896 @@
 
 <style>
 :root{
- --bg:#07111e;--panel:#101d2d;--panel2:#0b1929;
- --line:#263b52;--text:#eaf2fb;--muted:#91a5bb;
- --cyan:#27d6d0;--blue:#39a7ff;--green:#36d99a;
- --orange:#ffb454;--red:#ff6973;--purple:#ad91ff;
+  --bg:#07111d;--panel:#0d1b2a;--panel2:#102337;--line:#20384d;
+  --text:#e8f1f8;--muted:#91a8ba;--cyan:#35c6dc;--blue:#3987ff;
+  --green:#34d399;--orange:#f5a524;--red:#fb7185;
 }
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;font-family:Arial, sans-serif;background:var(--bg);color:var(--text)}
-button,input,select{font:inherit}
-.app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
-.topbar{height:66px;flex-shrink:0;background:#0b1827;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px}
-.brand{display:flex;align-items:center;gap:11px}
-.logo{width:38px;height:38px;border-radius:9px;background:linear-gradient(140deg,#0879ca,#1cc7a8);display:grid;place-items:center;font-size:20px;font-weight:bold}
-.brand h1{font-size:14px;letter-spacing:.8px;margin:0}
-.brand p{font-size:10px;color:var(--muted);margin:4px 0 0}
-.status{font-size:10px;color:var(--green)}
-.main{display:grid;grid-template-columns:minmax(270px,1fr) minmax(340px,1fr) minmax(270px,1fr);gap:10px;padding:10px;flex:1;min-height:0}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:9px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
-.panelhead{padding:12px 14px;background:#0d1a2a;border-bottom:1px solid var(--line);flex-shrink:0}
-.panelhead h2{font-size:11px;letter-spacing:1px;margin:0}
-.panelhead p{font-size:10px;color:var(--muted);margin:5px 0 0}
-.scroll{padding:13px;overflow-y:auto;min-height:0;flex:1}
-.scroll::-webkit-scrollbar{width:5px}
-.scroll::-webkit-scrollbar-thumb{background:#334c66;border-radius:8px}
-.section{border-bottom:1px solid var(--line);padding-bottom:13px;margin-bottom:13px}
-.section:last-child{border:0}
-.stitle{font-size:10px;color:var(--cyan);font-weight:bold;letter-spacing:1px;margin-bottom:10px}
-label{display:block;font-size:10px;color:#bdccdc;margin:9px 0 5px}
-select,input[type=number]{width:100%;background:#091625;color:var(--text);border:1px solid #314960;border-radius:5px;padding:9px;font-size:11px}
-input[type=range]{width:100%;accent-color:var(--cyan)}
-.value{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
-.btn{width:100%;border:0;border-radius:5px;padding:10px;margin-top:8px;background:#1379bc;color:white;font-size:10px;font-weight:bold;letter-spacing:.4px;cursor:pointer}
-.btn.green{background:#087c67}
-.btn.orange{background:#945719}
-.btn.dark{background:#233850;border:1px solid #3b5670}
-.btn:disabled{opacity:.55;cursor:wait}
-.note{font-size:10px;color:var(--muted);line-height:1.55;margin-top:7px}
-.source{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid #203249;font-size:10px}
-.source span:last-child{text-align:right;color:var(--orange);font-size:9px}
-.source .ok{color:var(--green)!important}
-.source .bad{color:var(--red)!important}
-.message{padding:9px;background:#091625;border:1px solid var(--line);border-radius:5px;font-size:10px;color:var(--muted);line-height:1.5;margin-top:9px;overflow-wrap:anywhere}
-.map-panel{position:relative}
-.maphead{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.maphead h2{font-size:11px;margin:0;letter-spacing:.8px}
-.maphead p{font-size:10px;color:var(--muted);margin:5px 0 0}
-.map-tools button{border:1px solid #3b5670;background:#20364e;color:white;border-radius:4px;padding:6px 8px;font-size:9px;cursor:pointer}
-#map{flex:1;min-height:0;background:#132333}
-.maplegend{position:absolute;z-index:500;left:12px;bottom:22px;padding:10px;background:#071522eF;border:1px solid #40556d;border-radius:6px;font-size:10px;line-height:1.9;pointer-events:none}
-.swatch{display:inline-block;width:12px;height:3px;margin-right:6px;vertical-align:middle}
-.mapcredit{font-size:9px;color:var(--muted);padding:5px 8px;background:#0d1a2a}
-.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.kpi{padding:10px;background:#0a1828;border:1px solid #293f57;border-radius:7px;min-width:0}
-.kpi small{display:block;color:var(--muted);font-size:9px;line-height:1.4}
-.kpi strong{display:block;font-size:17px;margin-top:7px;overflow-wrap:anywhere}
-.kpi em{display:block;font-style:normal;font-size:9px;color:var(--muted);margin-top:4px}
-.chartcard{margin-top:10px;padding:10px;background:#0a1828;border:1px solid #293f57;border-radius:7px}
-.charttitle{font-size:10px;font-weight:bold;margin-bottom:8px}
-.chartwrap{height:165px;position:relative}
-.chartwrap canvas{width:100%!important;height:100%!important}
-.check{display:flex;align-items:center;gap:7px;font-size:10px;margin:8px 0;color:#c7d6e5}
-.check input{accent-color:var(--cyan)}
-.footer{height:auto;min-height:28px;flex-shrink:0;padding:6px 12px;background:#0b1827;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#91a5bb;font-size:9px}
-@media(max-width:900px){
- .app{height:auto;min-height:100vh;overflow:visible}
- .main{grid-template-columns:1fr;overflow:visible}
- .panel{min-height:430px}
- .map-panel{height:590px}
- #map{min-height:440px}
- .scroll{overflow:visible}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
+font-family:Inter,Segoe UI,Arial,sans-serif;overflow:hidden}
+header{
+ height:66px;display:flex;align-items:center;justify-content:space-between;
+ padding:0 20px;background:#091725;border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#087f8c,#35c6dc);
+ display:grid;place-items:center;font-weight:900;color:#03131d}
+.brand h1{font-size:15px;margin:0;letter-spacing:.8px}
+.brand small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.header-right{font-size:11px;color:var(--muted);text-align:right}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--orange);margin-right:6px}
+main{height:calc(100% - 66px);display:grid;grid-template-columns:310px minmax(350px,1fr) 340px;gap:10px;padding:10px}
+.panel{min-height:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.panel-head{padding:13px 14px;border-bottom:1px solid var(--line);background:#0b1927;flex:none}
+.panel-head h2{font-size:12px;letter-spacing:1px;margin:0}
+.panel-head p{font-size:10px;color:var(--muted);margin:5px 0 0}
+.panel-body{padding:13px;overflow-y:auto;min-height:0;scrollbar-width:thin;scrollbar-color:#35536a transparent}
+.section{margin-bottom:16px}
+.section-title{font-size:10px;color:var(--cyan);font-weight:800;letter-spacing:1px;margin-bottom:9px}
+label{display:block;font-size:10px;color:var(--muted);margin:9px 0 5px}
+select,input[type=number],input[type=text]{
+ width:100%;padding:9px 10px;background:#081522;border:1px solid #294257;border-radius:6px;
+ color:var(--text);font-size:11px;outline:none
+}
+select:focus,input:focus{border-color:var(--cyan)}
+button{
+ border:0;border-radius:6px;padding:10px 12px;font-weight:700;font-size:10px;
+ cursor:pointer;color:#04131c;background:var(--cyan)
+}
+button.secondary{background:#20384d;color:var(--text);border:1px solid #35536a}
+button.orange{background:var(--orange);color:#211404}
+button.danger{background:#5b2634;color:#ffe3e8}
+.btn-row{display:flex;gap:7px;margin-top:10px}
+.btn-row button{flex:1}
+.note{font-size:9px;line-height:1.55;color:var(--muted);padding:9px;background:#0a1724;border:1px solid var(--line);border-radius:6px}
+.status-list{display:grid;gap:7px}
+.status-item{display:flex;justify-content:space-between;gap:8px;font-size:10px;padding:7px 8px;background:#091725;border:1px solid #1c3448;border-radius:5px}
+.status-item span:first-child{color:var(--muted)}
+.status-value{font-weight:700;text-align:right}
+.good{color:var(--green)}.bad{color:var(--red)}.waiting{color:var(--orange)}
+#mapWrap{position:relative;min-height:0;overflow:hidden;background:#142536;border:1px solid var(--line);border-radius:10px}
+#map{height:100%;width:100%;background:#172b3b}
+.map-overlay{position:absolute;z-index:500;top:12px;left:12px;max-width:calc(100% - 24px);
+ background:rgba(5,17,29,.91);border:1px solid #36536b;border-radius:7px;padding:10px 12px;pointer-events:none}
+.map-overlay strong{font-size:11px;display:block}
+.map-overlay span{font-size:9px;color:#b5c7d6}
+.map-legend{position:absolute;z-index:500;bottom:18px;left:12px;background:rgba(5,17,29,.93);
+ border:1px solid #36536b;border-radius:7px;padding:10px;font-size:9px;line-height:1.9}
+.legend-line{display:inline-block;width:17px;height:3px;margin-right:6px;vertical-align:middle}
+.map-attribution{position:absolute;z-index:500;right:8px;bottom:4px;font-size:9px;color:#fff;
+ text-shadow:0 1px 3px #000;pointer-events:none}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{padding:10px;background:#091725;border:1px solid #20384d;border-radius:7px;min-width:0}
+.kpi .k-label{font-size:9px;color:var(--muted);line-height:1.4}
+.kpi .k-value{font-size:19px;font-weight:800;margin-top:5px;overflow-wrap:anywhere}
+.kpi .k-unit{font-size:9px;color:var(--muted)}
+.chart-box{height:190px;padding:9px;background:#091725;border:1px solid var(--line);border-radius:7px;margin-bottom:10px}
+.chart-box h3{font-size:10px;margin:0 0 8px;color:#c9d8e4}
+.chart-box canvas{max-height:145px}
+.analytics-note{font-size:9px;color:var(--muted);line-height:1.5;margin-top:7px}
+footer{padding:10px 0 2px;text-align:center;color:#71899d;font-size:9px;line-height:1.6}
+.leaflet-control-attribution{font-size:8px!important}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0d1b2a;color:#e8f1f8}
+.leaflet-popup-content{font-size:11px}
+@media(max-width:1050px){
+ html,body{height:auto;min-height:100%;overflow:auto}
+ main{height:auto;grid-template-columns:1fr;padding:8px}
+ .panel{min-height:380px}
+ #mapWrap{height:65vh;min-height:420px;order:0}
+ header{position:sticky;top:0;z-index:1000}
 }
 </style>
 </head>
 
 <body>
-<div class="app">
-
-<header class="topbar">
+<header>
  <div class="brand">
   <div class="logo">G</div>
   <div>
-   <h1>GAMBIA URBAN ENERGY INTELLIGENCE</h1>
-   <p>GBoS GEOAI • Urban Digital Twin • Positive Energy District Planning</p>
+   <h1>GBoS GEOAI | GAMBIA URBAN ENERGY INTELLIGENCE</h1>
+   <small>Urban Energy • Population • Buildings • Positive Energy District Scenario</small>
   </div>
  </div>
- <div class="status" id="appStatus">INITIALISING</div>
+ <div class="header-right">
+  <span class="status-dot" id="connectionDot"></span><span id="globalStatus">INITIALISING ONLINE DATA</span>
+  <br>GIS / CARTOGRAPHY UNIT
+ </div>
 </header>
 
-<main class="main">
-
-<!-- CONTROLS -->
-<section class="panel">
- <div class="panelhead">
-  <h2>01 / CONTROLS & ONLINE DATA</h2>
-  <p>Administrative selection and automatic data retrieval</p>
- </div>
-
- <div class="scroll">
-
-  <div class="section">
-   <div class="stitle">ADMINISTRATIVE AREA</div>
-
-   <label>Region</label>
-   <select id="regionSelect">
-    <option value="ALL">All regions / National</option>
-   </select>
-
-   <label>District</label>
-   <select id="districtSelect">
-    <option value="ALL">All districts</option>
-   </select>
-
-   <label>Population reference year</label>
-   <select id="yearSelect">
-    <option>2015</option><option>2016</option><option>2017</option>
-    <option>2018</option><option>2019</option><option>2020</option>
-    <option>2021</option><option>2022</option><option>2023</option>
-    <option>2024</option><option selected>2025</option><option>2026</option>
-    <option>2027</option><option>2028</option><option>2029</option><option>2030</option>
-   </select>
-
-   <button class="btn" id="fetchBtn">FETCH ONLINE DATA</button>
-   <button class="btn dark" id="boundaryBtn">RELOAD ADMINISTRATIVE BOUNDARIES</button>
-   <button class="btn green" id="buildingBtn">FETCH DISTRICT BUILDINGS</button>
-
-   <div class="note">
-    Buildings are retrieved only after selecting an individual district. National building downloads are intentionally disabled to reduce timeouts.
+<main>
+ <!-- LEFT: CONTROLS -->
+ <section class="panel">
+  <div class="panel-head">
+   <h2>01 / CONTROLS & ONLINE DATA</h2>
+   <p>Administrative selection, data retrieval and scenario assumptions</p>
+  </div>
+  <div class="panel-body">
+   <div class="section">
+    <div class="section-title">ADMINISTRATIVE AREA</div>
+    <label for="regionSelect">Region</label>
+    <select id="regionSelect"><option value="">Loading regions...</option></select>
+    <label for="districtSelect">District</label>
+    <select id="districtSelect" disabled><option value="">Select a region first</option></select>
+    <div class="btn-row">
+     <button id="runBtn">RUN ANALYSIS</button>
+     <button class="secondary" id="resetBtn">RESET</button>
+    </div>
    </div>
-  </div>
 
-  <div class="section">
-   <div class="stitle">ONLINE DATA STATUS</div>
-   <div class="source"><span>National boundary</span><span id="sNational">Waiting</span></div>
-   <div class="source"><span>Regional boundaries</span><span id="sRegions">Waiting</span></div>
-   <div class="source"><span>District boundaries</span><span id="sDistricts">Waiting</span></div>
-   <div class="source"><span>WorldPop population</span><span id="sPopulation">Waiting</span></div>
-   <div class="source"><span>OSM buildings</span><span id="sBuildings">Not loaded</span></div>
-   <div class="source"><span>GBoS household totals</span><span id="sHouseholds">Not connected</span></div>
-   <div class="source"><span>NAWEC consumption</span><span id="sNawec">Not connected</span></div>
-   <div class="message" id="dataMessage">Connecting to online data services...</div>
-  </div>
-
-  <div class="section">
-   <div class="stitle">HOUSEHOLD & DEMAND ASSUMPTIONS</div>
-   <label>Average household size (persons)</label>
-   <input type="number" id="hhSize" value="8" min="1" max="20" step=".1">
-
-   <label>Annual electricity use per household (kWh)</label>
-   <input type="number" id="kwhHH" value="1200" min="0" step="100">
-
-   <label>Commercial / public-sector demand multiplier</label>
-   <div class="value"><span>Additional demand</span><b id="commercialLabel">25%</b></div>
-   <input type="range" id="commercial" min="0" max="100" value="25">
-  </div>
-
-  <div class="section">
-   <div class="stitle">POSITIVE ENERGY DISTRICT SCENARIO</div>
-
-   <label>Rooftop PV coverage</label>
-   <div class="value"><span>Coverage</span><b id="pvLabel">35%</b></div>
-   <input type="range" id="pvCoverage" min="0" max="100" value="35">
-
-   <label>PV system size per participating household (kWp)</label>
-   <input type="number" id="pvSize" value="3" min="0" step=".1">
-
-   <label>Annual solar yield (kWh/kWp/year)</label>
-   <input type="number" id="solarYield" value="1700" min="500" max="2500" step="50">
-
-   <label>Energy efficiency improvement</label>
-   <div class="value"><span>Efficiency</span><b id="effLabel">15%</b></div>
-   <input type="range" id="efficiency" min="0" max="60" value="15">
-
-   <label>Battery storage duration</label>
-   <div class="value"><span>Duration</span><b id="batteryLabel">4 hours</b></div>
-   <input type="range" id="battery" min="0" max="12" value="4">
-
-   <label>Additional electrification / appliance uptake</label>
-   <div class="value"><span>Uptake</span><b id="electLabel">20%</b></div>
-   <input type="range" id="electrification" min="0" max="100" value="20">
-
-   <button class="btn orange" id="runBtn">RUN ENERGY SCENARIO</button>
-   <button class="btn dark" id="resetBtn">RESET SCENARIO</button>
-  </div>
-
-  <div class="section">
-   <div class="stitle">MAP DISPLAY</div>
-   <label class="check"><input type="checkbox" id="showNational" checked> National boundary</label>
-   <label class="check"><input type="checkbox" id="showRegions" checked> Regional boundaries</label>
-   <label class="check"><input type="checkbox" id="showDistricts" checked> District boundaries</label>
-   <label class="check"><input type="checkbox" id="showSelected" checked> Selected area highlight</label>
-   <label class="check"><input type="checkbox" id="showBuildings" checked> OSM buildings</label>
-   <div class="note">Basemap: fixed Esri satellite imagery. It does not change when selecting an area or refreshing data.</div>
-  </div>
-
-  <div class="section">
-   <div class="stitle">EXPORTS</div>
-   <button class="btn dark" id="csvBtn">EXPORT ANALYTICS CSV</button>
-   <button class="btn dark" id="jsonBtn">EXPORT SCENARIO JSON</button>
-   <button class="btn dark" id="buildingsExportBtn">EXPORT BUILDINGS GEOJSON</button>
-   <button class="btn dark" id="boundariesExportBtn">EXPORT BOUNDARIES GEOJSON</button>
-  </div>
-
- </div>
-</section>
-
-<!-- MAP -->
-<section class="panel map-panel">
- <div class="panelhead maphead">
-  <div>
-   <h2>02 / INTERACTIVE GEOSPATIAL VIEW</h2>
-   <p id="mapSubtitle">The Gambia • National overview</p>
-  </div>
-  <div class="map-tools">
-   <button id="nationalZoom">GAMBIA</button>
-   <button id="selectedZoom">SELECTED AREA</button>
-  </div>
- </div>
-
- <div id="map"></div>
-
- <div class="maplegend">
-  <b>MAP LEGEND</b><br>
-  <span class="swatch" style="background:#24d4dc"></span>Regional boundary<br>
-  <span class="swatch" style="background:#ffb454"></span>District boundary<br>
-  <span class="swatch" style="background:#35dc9b"></span>Selected area<br>
-  <span class="swatch" style="background:#ad91ff"></span>OSM buildings
- </div>
-
- <div class="mapcredit">
-  Satellite imagery © Esri • Administrative boundaries: geoBoundaries • Buildings: © OpenStreetMap contributors
- </div>
-</section>
-
-<!-- ANALYTICS -->
-<section class="panel">
- <div class="panelhead">
-  <h2>03 / SPATIAL & ENERGY ANALYTICS</h2>
-  <p>Population indicators and modelled energy scenarios</p>
- </div>
-
- <div class="scroll">
-
-  <div class="section">
-   <div class="stitle">SELECTED AREA INDICATORS</div>
-   <div class="kpis">
-    <div class="kpi"><small>Population</small><strong id="kPopulation">—</strong><em id="populationYear">WorldPop reference</em></div>
-    <div class="kpi"><small>Estimated households</small><strong id="kHouseholds">—</strong><em>Modelled estimate</em></div>
-    <div class="kpi"><small>Area</small><strong id="kArea">—</strong><em>km²</em></div>
-    <div class="kpi"><small>Population density</small><strong id="kDensity">—</strong><em>Persons / km²</em></div>
-    <div class="kpi"><small>OSM building features</small><strong id="kBuildings">—</strong><em>Mapped features</em></div>
-    <div class="kpi"><small>Baseline energy demand</small><strong id="kDemand">—</strong><em>Estimated kWh/year</em></div>
-    <div class="kpi"><small>PV generation</small><strong id="kPV">—</strong><em>Estimated kWh/year</em></div>
-    <div class="kpi"><small>Annual energy balance</small><strong id="kBalance">—</strong><em>PV minus demand</em></div>
+   <div class="section">
+    <div class="section-title">POPULATION & HOUSEHOLDS</div>
+    <label for="yearSelect">Population reference year</label>
+    <select id="yearSelect">
+     <option>2025</option><option>2024</option><option>2023</option>
+     <option>2022</option><option>2021</option><option>2020</option>
+    </select>
+    <label for="hhSize">Average household size (persons)</label>
+    <input id="hhSize" type="number" min="1" max="20" step=".1" value="8.0">
+    <div class="note" style="margin-top:8px">
+     Household totals are modelled as population divided by the assumed household size.
+     They are not official GBoS household counts.
+    </div>
    </div>
-  </div>
 
-  <div class="section">
-   <div class="stitle">SCENARIO RESULTS</div>
-   <div class="kpis">
-    <div class="kpi"><small>Demand after efficiency</small><strong id="kEffDemand">—</strong><em>kWh/year</em></div>
-    <div class="kpi"><small>PV capacity</small><strong id="kCapacity">—</strong><em>kWp</em></div>
-    <div class="kpi"><small>Battery capacity</small><strong id="kStorage">—</strong><em>Scenario kWh</em></div>
-    <div class="kpi"><small>PV / demand ratio</small><strong id="kRatio">—</strong><em>Annual energy ratio</em></div>
+   <div class="section">
+    <div class="section-title">ENERGY SCENARIO ASSUMPTIONS</div>
+    <label for="dailyUse">Residential electricity use (kWh / household / day)</label>
+    <input id="dailyUse" type="number" min=".1" step=".1" value="2.5">
+    <label for="commercialShare">Commercial / public demand (% of residential)</label>
+    <input id="commercialShare" type="number" min="0" max="300" step="5" value="25">
+    <label for="electrification">Electrification coverage (%)</label>
+    <input id="electrification" type="number" min="0" max="100" value="75">
+    <label for="efficiency">Energy efficiency improvement (%)</label>
+    <input id="efficiency" type="number" min="0" max="90" value="20">
+    <label for="pvCoverage">Households with rooftop solar (%)</label>
+    <input id="pvCoverage" type="number" min="0" max="100" value="40">
+    <label for="pvSize">PV capacity per participating household (kWp)</label>
+    <input id="pvSize" type="number" min=".1" step=".1" value="2.5">
+    <label for="solarYield">Solar generation yield (kWh / kWp / day)</label>
+    <input id="solarYield" type="number" min=".1" step=".1" value="4.5">
+    <label for="batteryHours">Battery autonomy (hours)</label>
+    <input id="batteryHours" type="number" min="0" max="48" step="1" value="6">
+    <div class="btn-row">
+     <button class="secondary" id="recalculateBtn">RECALCULATE SCENARIO</button>
+    </div>
    </div>
-   <div class="message" id="scenarioMessage">Load population data to calculate scenario indicators.</div>
-  </div>
 
-  <div class="chartcard">
-   <div class="charttitle">Annual electricity demand vs PV generation</div>
-   <div class="chartwrap"><canvas id="energyChart"></canvas></div>
-  </div>
-
-  <div class="chartcard">
-   <div class="charttitle">Estimated energy demand composition</div>
-   <div class="chartwrap"><canvas id="demandChart"></canvas></div>
-  </div>
-
-  <div class="chartcard">
-   <div class="charttitle">Illustrative monthly solar generation profile</div>
-   <div class="chartwrap"><canvas id="solarChart"></canvas></div>
-  </div>
-
-  <div class="section" style="margin-top:14px">
-   <div class="stitle">METHODOLOGY & LIMITATIONS</div>
-   <div class="note">
-    <b>Population:</b> WorldPop Global2 R2025A, approximately 100 m population data. The selected administrative geometry is sent to the WorldPop API.<br><br>
-    <b>Households:</b> calculated by dividing population by the user-defined average household size. Not an official GBoS household count.<br><br>
-    <b>Energy demand:</b> calculated from estimated households and user-defined electricity-use assumptions. Not NAWEC meter data.<br><br>
-    <b>Solar generation:</b> installed PV capacity multiplied by the assumed annual solar yield. Not a measured solar-energy output.<br><br>
-    <b>Buildings:</b> OSM footprints may be incomplete and do not represent a complete national building inventory.<br><br>
-    <b>PED assessment:</b> annual energy balance alone does not establish Positive Energy District status. Hourly demand, generation, storage losses, grid imports and exports, and district energy boundaries are also required.
+   <div class="section">
+    <div class="section-title">ONLINE DATA CONNECTIONS</div>
+    <div class="status-list">
+     <div class="status-item"><span>National boundary</span><b id="sAdm0" class="status-value waiting">Waiting</b></div>
+     <div class="status-item"><span>Regional boundaries</span><b id="sAdm1" class="status-value waiting">Waiting</b></div>
+     <div class="status-item"><span>District boundaries</span><b id="sAdm2" class="status-value waiting">Waiting</b></div>
+     <div class="status-item"><span>WorldPop population</span><b id="sPopulation" class="status-value waiting">Waiting</b></div>
+     <div class="status-item"><span>OSM buildings</span><b id="sBuildings" class="status-value waiting">Not requested</b></div>
+     <div class="status-item"><span>GBoS household totals</span><b class="status-value bad">Not connected</b></div>
+     <div class="status-item"><span>NAWEC electricity consumption</span><b class="status-value bad">Not connected</b></div>
+    </div>
    </div>
-  </div>
 
-  <div class="section">
-   <div class="stitle">ONLINE SOURCES</div>
-   <div class="note">
-    geoBoundaries: <a href="https://www.geoboundaries.org/api.html" target="_blank" style="color:#49b9ff">API documentation</a><br>
-    WorldPop: <a href="https://api.worldpop.org/v3/documentation" target="_blank" style="color:#49b9ff">Population API</a><br>
-    OpenStreetMap: <a href="https://www.openstreetmap.org/" target="_blank" style="color:#49b9ff">OSM</a><br>
-    Overpass: <a href="https://overpass-api.de/" target="_blank" style="color:#49b9ff">API</a>
+   <div class="section">
+    <div class="section-title">EXPORTS</div>
+    <div class="btn-row">
+     <button class="secondary" id="csvBtn">EXPORT CSV</button>
+     <button class="secondary" id="jsonBtn">EXPORT JSON</button>
+    </div>
+    <div class="btn-row">
+     <button class="secondary" id="geoBtn">EXPORT SELECTED AREA GEOJSON</button>
+    </div>
    </div>
+   <div class="note" id="message">Starting application. Loading administrative boundaries from geoBoundaries.</div>
   </div>
+ </section>
 
- </div>
-</section>
+ <!-- CENTRE: FIXED SATELLITE MAP -->
+ <section id="mapWrap">
+  <div id="map"></div>
+  <div class="map-overlay">
+   <strong id="mapTitle">THE GAMBIA | NATIONAL VIEW</strong>
+   <span id="mapSubtitle">Satellite imagery • Administrative boundaries • Urban energy intelligence</span>
+  </div>
+  <div class="map-legend">
+   <div><span class="legend-line" style="background:#35c6dc"></span>National boundary</div>
+   <div><span class="legend-line" style="background:#f5a524"></span>Regional boundary</div>
+   <div><span class="legend-line" style="background:#f472b6"></span>District boundary</div>
+   <div><span class="legend-line" style="background:#34d399"></span>Selected area</div>
+   <div><span style="color:#60a5fa">●</span> OSM building footprints</div>
+  </div>
+  <div class="map-attribution">Satellite imagery © Esri</div>
+ </section>
 
+ <!-- RIGHT: ANALYTICS -->
+ <section class="panel">
+  <div class="panel-head">
+   <h2>02 / SPATIAL & ENERGY ANALYTICS</h2>
+   <p id="analyticsArea">The Gambia • National overview</p>
+  </div>
+  <div class="panel-body">
+   <div class="section">
+    <div class="section-title">AREA PROFILE</div>
+    <div class="kpi-grid">
+     <div class="kpi"><div class="k-label">Population</div><div class="k-value" id="kPopulation">—</div><div class="k-unit">persons • WorldPop</div></div>
+     <div class="kpi"><div class="k-label">Estimated households</div><div class="k-value" id="kHouseholds">—</div><div class="k-unit">modelled estimate</div></div>
+     <div class="kpi"><div class="k-label">OSM building features</div><div class="k-value" id="kBuildings">—</div><div class="k-unit">mapped features</div></div>
+     <div class="kpi"><div class="k-label">Area</div><div class="k-value" id="kArea">—</div><div class="k-unit">km² • boundary geometry</div></div>
+    </div>
+   </div>
+
+   <div class="section">
+    <div class="section-title">ENERGY SCENARIO INDICATORS</div>
+    <div class="kpi-grid">
+     <div class="kpi"><div class="k-label">Daily electricity demand</div><div class="k-value" id="kDemand">—</div><div class="k-unit">MWh / day</div></div>
+     <div class="kpi"><div class="k-label">Annual electricity demand</div><div class="k-value" id="kAnnual">—</div><div class="k-unit">GWh / year</div></div>
+     <div class="kpi"><div class="k-label">Potential daily PV generation</div><div class="k-value" id="kPV">—</div><div class="k-unit">MWh / day</div></div>
+     <div class="kpi"><div class="k-label">Indicative PV capacity</div><div class="k-value" id="kCapacity">—</div><div class="k-unit">MWp</div></div>
+     <div class="kpi"><div class="k-label">Battery storage requirement</div><div class="k-value" id="kStorage">—</div><div class="k-unit">MWh • indicative</div></div>
+     <div class="kpi"><div class="k-label">PV share of demand</div><div class="k-value" id="kShare">—</div><div class="k-unit">potential daily energy ratio</div></div>
+    </div>
+   </div>
+
+   <div class="section">
+    <div class="section-title">ENERGY ANALYTICS</div>
+    <div class="chart-box"><h3>Daily electricity demand and PV generation</h3><canvas id="energyChart"></canvas></div>
+    <div class="chart-box"><h3>Energy demand composition</h3><canvas id="compositionChart"></canvas></div>
+    <div class="chart-box"><h3>Scenario coverage indicators</h3><canvas id="coverageChart"></canvas></div>
+   </div>
+
+   <div class="section">
+    <div class="section-title">INTERPRETATION & DATA LIMITATIONS</div>
+    <div class="note" id="interpretation">
+     Select an administrative area and run the analysis to calculate scenario indicators.
+    </div>
+    <div class="analytics-note">
+     The energy results are planning scenarios derived from user-defined assumptions.
+     They are not measured electricity consumption, NAWEC customer data, a grid simulation,
+     or a certified Positive Energy District assessment. OSM building footprints represent
+     mapped features and may be incomplete.
+    </div>
+   </div>
+
+   <footer>
+    Produced by Ansu Singhateh<br>
+    GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics<br>
+    GBoS GEOAI • Research and educational use
+   </footer>
+  </div>
+ </section>
 </main>
-
-<footer class="footer">
- <span>Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics</span>
- <span>GBoS GEOAI • Research and educational use</span>
-</footer>
-</div>
 
 <script>
 "use strict";
 
-/* =========================================================
-   GAMBIA URBAN ENERGY INTELLIGENCE
-   FIXED SATELLITE BASEMAP
-   ONLINE ADMINISTRATIVE BOUNDARIES + WORLDPOP + OSM
-   ========================================================= */
-
-const $ = id => document.getElementById(id);
-
+/* ============================================================
+   APPLICATION STATE
+============================================================ */
 const state = {
- national:null,
- regions:null,
- districts:null,
- buildings:null,
- population:null,
- area:null,
- density:null,
- selectedRegion:"ALL",
- selectedDistrict:"ALL",
- selectedFeature:null,
- selectedName:"The Gambia",
- energy:null,
+ national:null, regions:null, districts:null,
+ selectedRegion:null, selectedDistrict:null,
+ population:null, buildings:null, buildingCount:0,
+ energy:null, areaKm2:null,
+ layers:{national:null,regions:null,districts:null,selected:null,buildings:null},
  charts:{}
 };
 
-const numberFormat = (v,d=0) =>
- Number.isFinite(Number(v))
- ? Number(v).toLocaleString("en-US",{maximumFractionDigits:d})
- : "—";
+const $ = id => document.getElementById(id);
+const fmt = (v,d=1) => Number.isFinite(Number(v))
+ ? Number(v).toLocaleString("en-US",{maximumFractionDigits:d}) : "—";
 
-const energyFormat = v => {
- if(!Number.isFinite(Number(v))) return "—";
- const n=Number(v);
- if(Math.abs(n)>=1e9)return numberFormat(n/1e9,2)+" GWh";
- if(Math.abs(n)>=1e6)return numberFormat(n/1e6,2)+" GWh";
- if(Math.abs(n)>=1e3)return numberFormat(n/1e3,2)+" MWh";
- return numberFormat(n)+" kWh";
-};
-
-function status(id,text,type=""){
- const el=$(id);
- el.textContent=text;
- el.className=type;
+function setStatus(id,text,kind="waiting"){
+ const el=$(id); el.textContent=text; el.className="status-value "+kind;
 }
-
-function setMessage(text){$("dataMessage").textContent=text;}
-
-function setBusy(id,busy,label){
- const b=$(id);
- if(busy){
-  if(!b.dataset.original)b.dataset.original=b.textContent;
-  b.disabled=true;
-  b.textContent=label;
- }else{
-  b.disabled=false;
-  b.textContent=b.dataset.original||b.textContent;
- }
+function setMessage(message){$("message").textContent=message;}
+function setGlobal(message,good=false){
+ $("globalStatus").textContent=message;
+ $("connectionDot").style.background=good?"#34d399":"#f5a524";
 }
-
-async function getJSON(url,options={},timeout=60000){
- const controller=new AbortController();
- const timer=setTimeout(()=>controller.abort(),timeout);
- try{
-  const response=await fetch(url,{...options,signal:controller.signal});
-  if(!response.ok)throw new Error("HTTP "+response.status+" from "+url);
-  return await response.json();
- }finally{clearTimeout(timer);}
+function safeName(v){return String(v||"").trim();}
+function featureName(feature){
+ const p=feature?.properties||{};
+ const keys=[
+  "shapeName","shapeName_en","NAME_1","NAME_2","ADM1_EN","ADM2_EN",
+  "admin1Name","admin2Name","name","NAME","name_1","name_2",
+  "region","Region","district","District","admin"
+ ];
+ for(const k of keys){if(p[k]!==undefined && p[k]!==null && String(p[k]).trim()) return String(p[k]).trim();}
+ return "Unnamed area";
 }
+function normalise(s){return safeName(s).toLowerCase().replace(/[^a-z0-9]/g,"");}
+function featureCollection(features){return {type:"FeatureCollection",features};}
 
-/* =========================================================
-   MAP: ONE PERMANENT SATELLITE BASEMAP
-   No basemap switcher. Never remove or replace this layer.
-   ========================================================= */
-
-const map=L.map("map",{
- zoomControl:true,
- preferCanvas:true
-}).setView([13.45,-15.45],8);
+/* ============================================================
+   MAP — FIXED ESRI WORLD IMAGERY
+   Do not remove, replace, or toggle this layer during selection.
+============================================================ */
+const map=L.map("map",{zoomControl:true,preferCanvas:true}).setView([13.45,-15.5],8);
 
 const satellite=L.tileLayer(
  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
- {
-  maxZoom:19,
-  attribution:"Tiles © Esri"
- }
+ {maxZoom:19,attribution:"Tiles © Esri"}
 ).addTo(map);
 
-const nationalLayer=L.geoJSON(null,{
- style:{color:"#36dc9b",weight:2.5,fillOpacity:.01}
-}).addTo(map);
-
-const regionLayer=L.geoJSON(null,{
- style:{color:"#24d4dc",weight:1.5,fillOpacity:.01}
- }).addTo(map);
-
-const districtLayer=L.geoJSON(null,{
- style:{color:"#ffb454",weight:1,fillOpacity:.005}
-}).addTo(map);
-
-const selectedLayer=L.geoJSON(null,{
- style:{color:"#36dc9b",weight:3,fillColor:"#36dc9b",fillOpacity:.13}
-}).addTo(map);
-
-const buildingLayer=L.geoJSON(null,{
- style:{color:"#ad91ff",weight:1,fillColor:"#ad91ff",fillOpacity:.55}
-}).addTo(map);
-
-function applyLayerVisibility(){
- const pairs=[
-  ["showNational",nationalLayer],
-  ["showRegions",regionLayer],
-  ["showDistricts",districtLayer],
-  ["showSelected",selectedLayer],
-  ["showBuildings",buildingLayer]
- ];
- pairs.forEach(([id,layer])=>{
-  if($(id).checked){
-   if(!map.hasLayer(layer))layer.addTo(map);
-  }else{
-   if(map.hasLayer(layer))map.removeLayer(layer);
-  }
- });
+function addGeoLayer(key,geojson,style,onEach){
+ if(state.layers[key]) map.removeLayer(state.layers[key]);
+ if(!geojson || !geojson.features?.length) return null;
+ state.layers[key]=L.geoJSON(geojson,{style,onEachFeature:onEach}).addTo(map);
+ return state.layers[key];
 }
-
-["showNational","showRegions","showDistricts","showSelected","showBuildings"]
-.forEach(id=>$(id).addEventListener("change",applyLayerVisibility));
-
-function zoomFeature(feature,maxZoom=13){
- if(!feature)return;
+function fitFeature(feature){
+ if(!feature || !feature.geometry) return;
  try{
-  const bounds=L.geoJSON(feature).getBounds();
-  if(bounds.isValid())map.fitBounds(bounds,{padding:[25,25],maxZoom});
- }catch(e){console.warn("Zoom error",e);}
+  const b=L.geoJSON(feature).getBounds();
+  if(b.isValid()) map.fitBounds(b,{padding:[30,30],maxZoom:14});
+ }catch(e){console.warn("Could not zoom to selected feature",e);}
+}
+function fitNational(){
+ if(state.national) fitFeature(state.national.features[0]);
+ else map.setView([13.45,-15.5],8);
+}
+function drawBoundaries(){
+ addGeoLayer("national",state.national,
+  {color:"#35c6dc",weight:2,fillOpacity:.015,opacity:.9});
+ addGeoLayer("regions",state.regions,
+  {color:"#f5a524",weight:1.5,fillOpacity:.015,opacity:.9});
+ addGeoLayer("districts",state.districts,
+  {color:"#f472b6",weight:1,fillOpacity:.01,opacity:.8});
+}
+function drawSelected(feature){
+ if(state.layers.selected) map.removeLayer(state.layers.selected);
+ if(!feature) return;
+ state.layers.selected=L.geoJSON(feature,{
+  style:{color:"#34d399",weight:3,fillColor:"#34d399",fillOpacity:.12}
+ }).addTo(map);
+ fitFeature(feature);
 }
 
-/* =========================================================
-   GEOBOUNDARIES
-   ========================================================= */
-
-const GB_BASE="https://www.geoboundaries.org/api/current/gbOpen/GMB/";
+/* ============================================================
+   GEOBOUNDARIES ONLINE DATA
+   Try current API first; use old host as a secondary endpoint.
+============================================================ */
+const GB_ENDPOINTS=[
+ "https://www.geoboundaries.org/api/current/gbOpen/GMB/",
+ "https://geoboundaries-dev.org/api/current/gbOpen/GMB/"
+];
 
 async function getBoundary(level){
- const metadata=await getJSON(GB_BASE+level+"/");
- const download=metadata.gjDownloadURL;
- if(!download)throw new Error("No GeoJSON download URL returned for "+level);
- const geojson=await getJSON(download,{},120000);
- if(!geojson || !geojson.features)throw new Error("Invalid "+level+" GeoJSON response");
- return geojson;
-}
-
-function props(f){return f?.properties||{};}
-
-function featureName(f){
- const p=props(f);
- const candidates=[
-  "shapeName","NAME_1","NAME_2","ADM1_EN","ADM2_EN",
-  "admin1Name","admin2Name","name","NAME","name_1","name_2"
- ];
- for(const k of candidates){
-  if(p[k]!==undefined && String(p[k]).trim()!=="")return String(p[k]).trim();
- }
- return "Unnamed area";
-}
-
-function getArea(f){
- try{return turf.area(f)/1e6;}catch(e){return null;}
-}
-
-function getCentre(f){
- try{return turf.centroid(f);}catch(e){return null;}
-}
-
-function parentRegion(district){
- if(!state.regions?.features)return null;
- const centre=getCentre(district);
- if(!centre)return null;
- for(const region of state.regions.features){
+ let lastError=null;
+ for(const base of GB_ENDPOINTS){
   try{
-   if(turf.booleanPointInPolygon(centre,region))return region;
-  }catch(e){}
+   const metadataUrl=base+level+"/";
+   const response=await fetch(metadataUrl,{
+    method:"GET",
+    headers:{"Accept":"application/json"},
+    cache:"no-store"
+   });
+   if(!response.ok) throw new Error("Metadata HTTP "+response.status+" from "+base);
+
+   const metadata=await response.json();
+   const geojsonUrl=metadata.gjDownloadURL ||
+                    metadata.simplifiedGeometryGeoJSON ||
+                    metadata.geoJSON;
+   if(!geojsonUrl) throw new Error("No GeoJSON URL in "+level+" metadata.");
+
+   const geoResponse=await fetch(geojsonUrl,{
+    method:"GET",
+    headers:{"Accept":"application/geo+json, application/json"},
+    cache:"no-store"
+   });
+   if(!geoResponse.ok) throw new Error("GeoJSON HTTP "+geoResponse.status);
+
+   const geojson=await geoResponse.json();
+   if(!geojson || geojson.type!=="FeatureCollection" ||
+      !Array.isArray(geojson.features)){
+    throw new Error("Invalid GeoJSON FeatureCollection.");
+   }
+   if(!geojson.features.length) throw new Error("The boundary dataset is empty.");
+   console.info("Loaded",level,"from",base);
+   return geojson;
+  }catch(error){
+   lastError=error;
+   console.warn("Boundary source failed:",base,level,error);
+  }
  }
- return null;
+ throw new Error(level+" failed on all geoBoundaries sources. "+
+  (lastError?lastError.message:"Unknown network error."));
 }
 
-function getSelectedFeature(){
- if(state.selectedDistrict!=="ALL"){
-  const f=state.districts?.features?.find(x=>featureName(x)===state.selectedDistrict);
-  if(f)return f;
- }
- if(state.selectedRegion!=="ALL"){
-  const f=state.regions?.features?.find(x=>featureName(x)===state.selectedRegion);
-  if(f)return f;
- }
- return state.national?.features?.[0]||null;
-}
-
-function populateRegions(){
- const select=$("regionSelect");
- select.innerHTML='<option value="ALL">All regions / National</option>';
- (state.regions?.features||[]).forEach(f=>{
-  const name=featureName(f);
-  const o=document.createElement("option");
-  o.value=name;o.textContent=name;select.appendChild(o);
+function populateSelect(select,features,placeholder){
+ select.innerHTML="";
+ const first=document.createElement("option");
+ first.value="";first.textContent=placeholder;select.appendChild(first);
+ const names=[...new Set((features||[]).map(featureName))].sort((a,b)=>a.localeCompare(b));
+ names.forEach(name=>{
+  const option=document.createElement("option");
+  option.value=name;option.textContent=name;select.appendChild(option);
  });
 }
-
-function populateDistricts(){
- const select=$("districtSelect");
- select.innerHTML='<option value="ALL">All districts</option>';
-
- let list=state.districts?.features||[];
- if(state.selectedRegion!=="ALL"){
-  list=list.filter(d=>{
-   const parent=parentRegion(d);
-   return parent && featureName(parent)===state.selectedRegion;
-  });
- }
-
- list.forEach(f=>{
-  const name=featureName(f);
-  const o=document.createElement("option");
-  o.value=name;o.textContent=name;select.appendChild(o);
- });
-}
-
-function redrawMap(){
- nationalLayer.clearLayers();
- regionLayer.clearLayers();
- districtLayer.clearLayers();
- selectedLayer.clearLayers();
-
- if(state.national)nationalLayer.addData(state.national);
- if(state.regions)regionLayer.addData(state.regions);
-
- let visibleDistricts=state.districts?.features||[];
- if(state.selectedRegion!=="ALL"){
-  visibleDistricts=visibleDistricts.filter(d=>{
-   const p=parentRegion(d);
-   return p && featureName(p)===state.selectedRegion;
-  });
- }
- if(visibleDistricts.length){
-  districtLayer.addData({
-   type:"FeatureCollection",
-   features:visibleDistricts
-  });
- }
-
- state.selectedFeature=getSelectedFeature();
-
- if(state.selectedFeature){
-  selectedLayer.addData(state.selectedFeature);
-  state.selectedName=state.selectedDistrict!=="ALL"
-   ?state.selectedDistrict
-   :state.selectedRegion!=="ALL"
-    ?state.selectedRegion
-    :"The Gambia";
-
-  $("mapSubtitle").textContent=state.selectedName+" • Satellite view";
-  zoomFeature(state.selectedFeature);
- }
-
- applyLayerVisibility();
+function findFeature(collection,name){
+ if(!collection || !name) return null;
+ const wanted=normalise(name);
+ return collection.features.find(f=>normalise(featureName(f))===wanted)||null;
 }
 
 async function loadBoundaries(){
- setBusy("boundaryBtn",true,"LOADING BOUNDARIES...");
- setMessage("Retrieving The Gambia administrative boundaries from geoBoundaries...");
-
- const tasks=[
-  ["ADM0","sNational","national"],
-  ["ADM1","sRegions","regions"],
-  ["ADM2","sDistricts","districts"]
+ setGlobal("LOADING ADMINISTRATIVE BOUNDARIES");
+ setMessage("Connecting to geoBoundaries online administrative data...");
+ const levels=[
+  ["ADM0","national","sAdm0"],
+  ["ADM1","regions","sAdm1"],
+  ["ADM2","districts","sAdm2"]
  ];
-
- const results=await Promise.allSettled(tasks.map(t=>getBoundary(t[0])));
-
+ const results=await Promise.allSettled(levels.map(x=>getBoundary(x[0])));
  results.forEach((result,i)=>{
-  const [,statusId,key]=tasks[i];
+  const [,key,statusId]=levels[i];
   if(result.status==="fulfilled"){
    state[key]=result.value;
-   status(statusId,"Loaded","ok");
+   setStatus(statusId,"Loaded","good");
   }else{
-   status(statusId,"Failed","bad");
-   console.error("Boundary failure:",key,result.reason);
+   console.error(levels[i][0],result.reason);
+   setStatus(statusId,"Failed","bad");
   }
  });
 
- setBusy("boundaryBtn",false);
+ if(state.regions) populateSelect($("regionSelect"),state.regions.features,"Select a region");
+ else $("regionSelect").innerHTML='<option value="">Regions unavailable</option>';
+
+ if(state.districts) populateSelect($("districtSelect"),state.districts.features,"Select a district");
+ else $("districtSelect").innerHTML='<option value="">Districts unavailable</option>';
+
+ drawBoundaries();
 
  if(!state.national && !state.regions && !state.districts){
-  setMessage("No boundary data loaded. Check internet access and browser console.");
-  $("appStatus").textContent="BOUNDARY ERROR";
+  setMessage("BOUNDARY DOWNLOAD FAILED. Your browser or network may be blocking cross-origin requests. Open Developer Tools → Console for the exact error.");
+  setGlobal("BOUNDARY SOURCE ERROR");
   return;
  }
 
- populateRegions();
- populateDistricts();
- redrawMap();
-
- $("appStatus").textContent="BOUNDARIES LOADED";
- setMessage("Administrative boundaries loaded. Retrieving population separately...");
- await loadPopulation();
+ if(state.national) fitNational();
+ setMessage("Boundary requests completed. Select a region or district to retrieve population and building data.");
+ setGlobal("BOUNDARIES LOADED",true);
 }
 
-/* =========================================================
-   WORLDPOP POPULATION API
-   ========================================================= */
-
-function simplifyForAPI(feature){
- try{
-  return turf.simplify(feature,{
-   tolerance:0.00015,
-   highQuality:false,
-   mutate:false
-  });
- }catch(e){return feature;}
+/* ============================================================
+   ADMINISTRATIVE SELECTION
+============================================================ */
+function selectedFeature(){
+ if(state.selectedDistrict) return state.selectedDistrict;
+ if(state.selectedRegion) return state.selectedRegion;
+ return state.national?.features?.[0]||null;
 }
-
-async function loadPopulation(){
- const feature=getSelectedFeature();
- if(!feature){
-  setMessage("No selected boundary geometry is available.");
+function updateDistrictOptions(){
+ const regionName=$("regionSelect").value;
+ state.selectedRegion=regionName?findFeature(state.regions,regionName):null;
+ state.selectedDistrict=null;
+ $("districtSelect").value="";
+ if(!regionName){
+  populateSelect($("districtSelect"),state.districts?.features||[],"Select a region first");
+  $("districtSelect").disabled=true;
   return;
  }
+ if(!state.districts){$("districtSelect").disabled=true;return;}
 
- const year=Number($("yearSelect").value);
- status("sPopulation","Retrieving...");
- setMessage("Requesting WorldPop population for "+state.selectedName+" ("+year+")...");
-
- try{
-  const response=await getJSON(
-   "https://api.worldpop.org/v3/population",
-   {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-     geojson:simplifyForAPI(feature),
-     year:year
-    })
-   },
-   180000
-  );
-
-  if(response.error)throw new Error(response.error);
-  if(response.total_population===undefined){
-   throw new Error("WorldPop response did not include total_population.");
-  }
-
-  state.population=Number(response.total_population);
-  state.area=Number(response.area_km2)||getArea(feature);
-  state.density=Number(response.population_density);
-
-  if(!Number.isFinite(state.density) && state.area>0){
-   state.density=state.population/state.area;
-  }
-
-  status("sPopulation","Loaded • "+year,"ok");
-  $("populationYear").textContent="WorldPop • "+(response.data_year||year);
-  updatePopulationKPIs();
-  runAnalysis();
-
-  setMessage(
-   "Population successfully retrieved for "+state.selectedName+
-   ". Source: "+(response.data_source||"WorldPop")+"."
-  );
-  $("appStatus").textContent="POPULATION LOADED";
-
- }catch(error){
-  state.population=null;
-  state.area=getArea(feature);
-  state.density=null;
-  status("sPopulation","Failed","bad");
-  updatePopulationKPIs();
-  runAnalysis();
-  setMessage("WorldPop request failed: "+error.message+". The administrative map remains available.");
-  console.error("WorldPop error:",error);
- }
-}
-
-function updatePopulationKPIs(){
- $("kPopulation").textContent=state.population===null?"—":numberFormat(state.population);
- $("kArea").textContent=state.area===null?"—":numberFormat(state.area,2);
- $("kDensity").textContent=state.density===null?"—":numberFormat(state.density,1);
-
- const hhSize=Math.max(1,Number($("hhSize").value)||8);
- $("kHouseholds").textContent=state.population===null
-  ?"—":numberFormat(state.population/hhSize);
-}
-
-/* =========================================================
-   OPENSTREETMAP BUILDINGS
-   ========================================================= */
-
-const OVERPASS=[
- "https://overpass-api.de/api/interpreter",
- "https://overpass.kumi.systems/api/interpreter"
-];
-
-function convertOSM(osm){
- const features=[];
- (osm.elements||[]).forEach(el=>{
-  if(el.type!=="way" || !el.geometry || el.geometry.length<2)return;
-
-  const coords=el.geometry.map(p=>[p.lon,p.lat]);
-  const first=coords[0],last=coords[coords.length-1];
-  const closed=first[0]===last[0] && first[1]===last[1];
-
-  if(closed && coords.length>=4){
-   features.push({
-    type:"Feature",
-    id:"osm-"+el.id,
-    properties:{osm_id:el.id,...(el.tags||{})},
-    geometry:{type:"Polygon",coordinates:[coords]}
-   });
-  }
- });
- return {type:"FeatureCollection",features};
-}
-
-async function overpassRequest(query){
- let lastError=null;
- for(const endpoint of OVERPASS){
+ let candidates=state.districts.features;
+ if(state.selectedRegion){
   try{
-   const controller=new AbortController();
-   const timer=setTimeout(()=>controller.abort(),180000);
+   candidates=candidates.filter(f=>{
+    const c=turf.centroid(f);
+    return turf.booleanPointInPolygon(c,state.selectedRegion);
+   });
+  }catch(e){console.warn("Could not spatially filter districts",e);}
+ }
+ populateSelect($("districtSelect"),candidates,"Select a district");
+ $("districtSelect").disabled=false;
+}
+$("regionSelect").addEventListener("change",async()=>{
+ updateDistrictOptions();
+ const feature=state.selectedRegion;
+ state.selectedDistrict=null;
+ state.population=null;state.buildings=null;state.buildingCount=0;
+ if(feature){
+  drawSelected(feature);
+  updateAreaLabels(feature);
+  await runAnalysis();
+ }else{
+  if(state.layers.selected)map.removeLayer(state.layers.selected);
+  fitNational();
+  updateAreaLabels(selectedFeature());
+  await runAnalysis();
+ }
+});
+$("districtSelect").addEventListener("change",async()=>{
+ state.selectedDistrict=findFeature(state.districts,$("districtSelect").value);
+ const feature=selectedFeature();
+ if(feature){
+  drawSelected(feature);
+  updateAreaLabels(feature);
+  await runAnalysis();
+ }
+});
+
+/* ============================================================
+   SELECTED AREA PROFILE
+============================================================ */
+function updateAreaLabels(feature){
+ const name=feature?featureName(feature):"The Gambia";
+ const region=$("regionSelect").value;
+ $("mapTitle").textContent=name.toUpperCase()+" | URBAN ENERGY VIEW";
+ $("mapSubtitle").textContent=region && state.selectedDistrict
+  ? region+" Region • "+name+" District"
+  : region?region+" Region • Districts and population":"National overview • The Gambia";
+ $("analyticsArea").textContent=name+" • "+(state.selectedDistrict?"District":region?"Region":"National overview");
+ try{
+  state.areaKm2=feature? turf.area(feature)/1e6:null;
+  $("kArea").textContent=state.areaKm2?fmt(state.areaKm2,2):"—";
+ }catch(e){state.areaKm2=null;$("kArea").textContent="—";}
+}
+
+/* ============================================================
+   WORLDPOP POPULATION
+   A failed API call is reported as unavailable; no population
+   values are fabricated.
+============================================================ */
+async function loadPopulation(feature){
+ if(!feature){setStatus("sPopulation","No area","bad");return null;}
+ setStatus("sPopulation","Loading...","waiting");
+ const year=Number($("yearSelect").value);
+ try{
+  const response=await fetch("https://api.worldpop.org/v3/population",{
+   method:"POST",
+   headers:{"Content-Type":"application/json","Accept":"application/json"},
+   body:JSON.stringify({
+    geojson:feature,
+    year:year,
+    runas:"TRUE"
+   })
+  });
+  if(!response.ok) throw new Error("WorldPop HTTP "+response.status);
+  const data=await response.json();
+
+  // WorldPop may return an immediate result or a task identifier.
+  let population=null;
+  if(data.data && Number.isFinite(Number(data.data.total_population))){
+   population=Number(data.data.total_population);
+  }else if(data.total_population!==undefined){
+   population=Number(data.total_population);
+  }else if(data.data && data.data.taskid){
+   const taskId=data.data.taskid;
+   for(let i=0;i<12;i++){
+    await new Promise(resolve=>setTimeout(resolve,2500));
+    const poll=await fetch("https://api.worldpop.org/v3/tasks/"+encodeURIComponent(taskId));
+    if(!poll.ok) continue;
+    const task=await poll.json();
+    if(task.data && task.data.status==="finished"){
+     population=Number(task.data.result?.total_population ??
+                        task.data.total_population);
+     break;
+    }
+    if(task.data && task.data.status==="failed") break;
+   }
+  }
+  if(!Number.isFinite(population) || population<0){
+   throw new Error("WorldPop response did not contain a usable population total.");
+  }
+  state.population=population;
+  setStatus("sPopulation","Loaded","good");
+  return population;
+ }catch(error){
+  console.warn("WorldPop population request failed:",error);
+  state.population=null;
+  setStatus("sPopulation","Unavailable","bad");
+  return null;
+ }
+}
+
+/* ============================================================
+   OPENSTREETMAP BUILDING FOOTPRINTS
+============================================================ */
+function getFeatureBbox(feature){
+ const b=turf.bbox(feature);
+ return {south:b[1],west:b[0],north:b[3],east:b[2]};
+}
+async function loadBuildings(feature){
+ if(!feature){setStatus("sBuildings","No area","bad");return;}
+ setStatus("sBuildings","Loading...","waiting");
+ state.buildings=null;state.buildingCount=0;
+ $("kBuildings").textContent="…";
+ try{
+  const b=getFeatureBbox(feature);
+  const bbox=[b.south,b.west,b.north,b.east].join(",");
+  const query='[out:json][timeout:35];(way["building"]('+bbox+'););out body geom;';
+  const endpoints=[
+   "https://overpass-api.de/api/interpreter",
+   "https://overpass.kumi.systems/api/interpreter"
+  ];
+  let payload=null,lastError=null;
+  for(const endpoint of endpoints){
    try{
     const response=await fetch(endpoint,{
      method:"POST",
      headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
-     body:"data="+encodeURIComponent(query),
-     signal:controller.signal
+     body:"data="+encodeURIComponent(query)
     });
-    if(!response.ok)throw new Error("Overpass HTTP "+response.status);
-    return await response.json();
-   }finally{clearTimeout(timer);}
-  }catch(e){
-   lastError=e;
-   console.warn("Overpass endpoint failed:",endpoint,e);
+    if(!response.ok) throw new Error("Overpass HTTP "+response.status);
+    payload=await response.json();
+    break;
+   }catch(e){lastError=e;console.warn("Overpass endpoint failed",endpoint,e);}
   }
- }
- throw lastError||new Error("All Overpass services failed.");
-}
+  if(!payload) throw lastError||new Error("No Overpass endpoint responded.");
 
-async function loadBuildings(){
- if(state.selectedDistrict==="ALL"){
-  status("sBuildings","Select district");
-  setMessage("Please select an individual district before retrieving buildings.");
-  return;
- }
-
- const feature=getSelectedFeature();
- if(!feature){
-  setMessage("No district boundary available.");
-  return;
- }
-
- setBusy("buildingBtn",true,"FETCHING BUILDINGS...");
- status("sBuildings","Retrieving...");
- setMessage("Retrieving OpenStreetMap building footprints for "+state.selectedDistrict+"...");
-
- try{
-  const bbox=turf.bbox(feature);
-  const box=[bbox[1],bbox[0],bbox[3],bbox[2]].join(",");
-  const query='[out:json][timeout:120];way["building"]('+box+');out geom;';
-
-  const osm=await overpassRequest(query);
-  const geojson=convertOSM(osm);
-
-  state.buildings=geojson;
-  buildingLayer.clearLayers();
-  buildingLayer.addData(geojson);
-  applyLayerVisibility();
-
-  $("kBuildings").textContent=numberFormat(geojson.features.length);
-  status("sBuildings","Loaded • "+numberFormat(geojson.features.length),"ok");
-  setMessage("Retrieved "+numberFormat(geojson.features.length)+" mapped OSM building polygons for "+state.selectedDistrict+".");
-  $("appStatus").textContent="BUILDINGS LOADED";
-
+  const features=[];
+  for(const element of (payload.elements||[])){
+   if(element.type!=="way" || !Array.isArray(element.geometry) || element.geometry.length<3) continue;
+   const coords=element.geometry.map(p=>[p.lon,p.lat]);
+   if(coords.length<3) continue;
+   if(coords[0][0]!==coords[coords.length-1][0] ||
+      coords[0][1]!==coords[coords.length-1][1]) coords.push(coords[0]);
+   try{
+    const poly=turf.polygon([coords],{osm_id:element.id,building:element.tags?.building||"yes"});
+    if(turf.booleanIntersects(poly,feature)) features.push(poly);
+   }catch(e){}
+  }
+  state.buildings=featureCollection(features);
+  state.buildingCount=features.length;
+  if(state.layers.buildings)map.removeLayer(state.layers.buildings);
+  state.layers.buildings=L.geoJSON(state.buildings,{
+   style:{color:"#60a5fa",weight:.5,fillColor:"#3b82f6",fillOpacity:.32}
+  }).addTo(map);
+  $("kBuildings").textContent=fmt(state.buildingCount,0);
+  setStatus("sBuildings","Loaded","good");
  }catch(error){
-  status("sBuildings","Failed","bad");
-  setMessage("Building retrieval failed: "+error.message+". Try again later or choose a smaller district.");
-  console.error("OSM error:",error);
- }finally{
-  setBusy("buildingBtn",false);
+  console.error("Building retrieval failed:",error);
+  state.buildings=null;state.buildingCount=0;
+  $("kBuildings").textContent="—";
+  setStatus("sBuildings","Unavailable","bad");
  }
 }
 
-/* =========================================================
+/* ============================================================
    ENERGY MODEL
-   ========================================================= */
-
-function model(){
- if(state.population===null)return null;
-
- const population=state.population;
- const households=population/Math.max(1,Number($("hhSize").value)||8);
- const annualUse=Math.max(0,Number($("kwhHH").value)||0);
-
- const commercial=Number($("commercial").value)/100;
- const pvCoverage=Number($("pvCoverage").value)/100;
- const pvSize=Math.max(0,Number($("pvSize").value)||0);
- const yieldValue=Math.max(0,Number($("solarYield").value)||0);
- const efficiency=Number($("efficiency").value)/100;
- const batteryHours=Number($("battery").value);
- const electrification=Number($("electrification").value)/100;
-
- const residential=households*annualUse;
- const commercialDemand=residential*commercial;
- const electrificationDemand=residential*electrification*.10;
-
- const baseline=residential+commercialDemand+electrificationDemand;
- const demandAfterEfficiency=baseline*(1-efficiency);
-
- const participating=households*pvCoverage;
- const capacity=participating*pvSize;
- const generation=capacity*yieldValue;
-
- // Illustrative storage: participating households × 1 kW reference × hours.
- const storage=participating*batteryHours;
-
- const balance=generation-demandAfterEfficiency;
- const ratio=demandAfterEfficiency>0?generation/demandAfterEfficiency:0;
-
- return {
-  population,households,residential,commercialDemand,electrificationDemand,
-  baseline,demandAfterEfficiency,participating,capacity,generation,
-  storage,balance,ratio,efficiency,pvCoverage,batteryHours
- };
+============================================================ */
+function inputNumber(id,minimum=0){
+ const v=Number($(id).value);
+ return Number.isFinite(v)?Math.max(minimum,v):minimum;
 }
-
-function clearKPIs(){
- ["kDemand","kPV","kBalance","kEffDemand","kCapacity","kStorage","kRatio"]
- .forEach(id=>$(id).textContent="—");
- $("scenarioMessage").textContent="Load population data before running the energy scenario.";
-}
-
-function runAnalysis(){
- updatePopulationKPIs();
- const m=model();
- if(!m){
+function calculateEnergy(){
+ const pop=state.population;
+ if(!Number.isFinite(pop)){
   state.energy=null;
-  clearKPIs();
+  clearEnergyKPIs();
+  $("interpretation").textContent=
+   "Population data are unavailable for this area. The energy model requires a valid population estimate. No population or electricity values have been invented.";
+  updateCharts(null);
+  return null;
+ }
+ const hhSize=Math.max(1,inputNumber("hhSize",1));
+ const households=pop/hhSize;
+ const dailyUse=inputNumber("dailyUse",0);
+ const commercialShare=inputNumber("commercialShare",0)/100;
+ const electrification=Math.min(100,inputNumber("electrification",0))/100;
+ const efficiency=Math.min(90,inputNumber("efficiency",0))/100;
+ const pvCoverage=Math.min(100,inputNumber("pvCoverage",0))/100;
+ const pvSize=inputNumber("pvSize",0);
+ const solarYield=inputNumber("solarYield",0);
+ const batteryHours=inputNumber("batteryHours",0);
+
+ const connectedHouseholds=households*electrification;
+ const residentialDaily=connectedHouseholds*dailyUse*(1-efficiency);
+ const commercialDaily=residentialDaily*commercialShare;
+ const totalDaily=residentialDaily+commercialDaily;
+ const annualKwh=totalDaily*365;
+ const participatingHouseholds=households*pvCoverage;
+ const pvCapacityKwp=participatingHouseholds*pvSize;
+ const pvDailyKwh=pvCapacityKwp*solarYield;
+ const batteryKwh=participatingHouseholds*dailyUse*(batteryHours/24);
+ const pvShare=totalDaily>0?(pvDailyKwh/totalDaily)*100:0;
+
+ state.energy={
+  population:pop,households,connectedHouseholds,
+  residentialDaily,commercialDaily,totalDaily,annualKwh,
+  participatingHouseholds,pvCapacityKwp,pvDailyKwh,batteryKwh,
+  pvShare,electrification:electrification*100,
+  efficiency:efficiency*100,pvCoverage:pvCoverage*100
+ };
+ renderEnergyKPIs(state.energy);
+ updateCharts(state.energy);
+ const balance=pvDailyKwh-totalDaily;
+ $("interpretation").textContent=
+  "For "+fmt(pop,0)+" estimated residents and approximately "+fmt(households,0)+
+  " modelled households, the assumed scenario produces "+fmt(totalDaily/1000,2)+
+  " MWh/day of electricity demand and "+fmt(pvDailyKwh/1000,2)+
+  " MWh/day of potential solar generation. The indicative daily PV balance is "+
+  (balance>=0?"+":"")+fmt(balance/1000,2)+" MWh/day. This is an energy scenario, not a measured grid balance.";
+ return state.energy;
+}
+function clearEnergyKPIs(){
+ ["kHouseholds","kDemand","kAnnual","kPV","kCapacity","kStorage","kShare"].forEach(id=>$(id).textContent="—");
+}
+function renderEnergyKPIs(e){
+ $("kPopulation").textContent=fmt(e.population,0);
+ $("kHouseholds").textContent=fmt(e.households,0);
+ $("kDemand").textContent=fmt(e.totalDaily/1000,2);
+ $("kAnnual").textContent=fmt(e.annualKwh/1e6,2);
+ $("kPV").textContent=fmt(e.pvDailyKwh/1000,2);
+ $("kCapacity").textContent=fmt(e.pvCapacityKwp/1000,2);
+ $("kStorage").textContent=fmt(e.batteryKwh/1000,2);
+ $("kShare").textContent=fmt(e.pvShare,1)+"%";
+}
+
+/* ============================================================
+   CHARTS
+============================================================ */
+Chart.defaults.color="#9fb4c5";
+Chart.defaults.font.family="Inter,Segoe UI,Arial";
+Chart.defaults.font.size=9;
+function destroyChart(key){
+ if(state.charts[key]){state.charts[key].destroy();state.charts[key]=null;}
+}
+function updateCharts(e){
+ destroyChart("energy");destroyChart("composition");destroyChart("coverage");
+ if(!e)return;
+ const common={responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{labels:{boxWidth:9,padding:10}}}};
+ state.charts.energy=new Chart($("energyChart"),{
+  type:"bar",data:{labels:["Daily energy"],datasets:[
+   {label:"Demand (MWh/day)",data:[e.totalDaily/1000],backgroundColor:"#3987ff"},
+   {label:"Potential PV (MWh/day)",data:[e.pvDailyKwh/1000],backgroundColor:"#34d399"}
+  ]},options:{...common,scales:{y:{beginAtZero:true,grid:{color:"#20384d"}}}}
+ });
+ state.charts.composition=new Chart($("compositionChart"),{
+  type:"doughnut",data:{labels:["Residential demand","Commercial / public demand"],
+   datasets:[{data:[e.residentialDaily,e.commercialDaily],
+    backgroundColor:["#3987ff","#f5a524"],borderColor:"#091725",borderWidth:2}]},
+  options:{...common,cutout:"62%"}
+ });
+ state.charts.coverage=new Chart($("coverageChart"),{
+  type:"bar",data:{labels:["Electrification","PV participation","Efficiency improvement","PV share of demand"],
+   datasets:[{label:"Scenario (%)",data:[e.electrification,e.pvCoverage,e.efficiency,e.pvShare],
+    backgroundColor:["#35c6dc","#34d399","#f5a524","#a78bfa"]}]},
+  options:{...common,indexAxis:"y",scales:{x:{beginAtZero:true,grid:{color:"#20384d"}}},
+   plugins:{legend:{display:false}}}
+ });
+}
+
+/* ============================================================
+   RUN ANALYSIS
+============================================================ */
+let activeRun=0;
+async function runAnalysis(){
+ const runId=++activeRun;
+ const feature=selectedFeature();
+ if(!feature){
+  setMessage("No selected boundary is available. Check the boundary connection status.");
   return;
  }
-
- state.energy=m;
-
- $("kDemand").textContent=energyFormat(m.baseline);
- $("kPV").textContent=energyFormat(m.generation);
- $("kBalance").textContent=energyFormat(m.balance);
- $("kEffDemand").textContent=energyFormat(m.demandAfterEfficiency);
- $("kCapacity").textContent=numberFormat(m.capacity,1)+" kWp";
- $("kStorage").textContent=numberFormat(m.storage,1)+" kWh";
- $("kRatio").textContent=numberFormat(m.ratio*100,1)+"%";
-
- $("scenarioMessage").textContent=m.balance>=0
-  ?"Estimated annual PV generation exceeds the modelled annual demand. This is an indicative energy balance, not a certified PED result."
-  :"Estimated annual PV generation is below the modelled annual demand. This is an indicative energy balance, not a certified PED result.";
-
- updateCharts(m);
-}
-
-function makeChart(id,type,data,options={}){
- if(state.charts[id])state.charts[id].destroy();
-
- state.charts[id]=new Chart($(id),{
-  type,
-  data,
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   plugins:{
-    legend:{labels:{color:"#c4d4e5",font:{size:9}}}
-   },
-   scales:type==="doughnut"?{}:{
-    x:{ticks:{color:"#9fb1c5",font:{size:9}},grid:{color:"#25384c"}},
-    y:{ticks:{color:"#9fb1c5",font:{size:9}},grid:{color:"#25384c"}}
-   },
-   ...options
-  }
- });
-}
-
-function updateCharts(m){
- makeChart("energyChart","bar",{
-  labels:["Demand after efficiency","PV generation"],
-  datasets:[{
-   label:"kWh/year",
-   data:[m.demandAfterEfficiency,m.generation],
-   backgroundColor:["#ffb454","#36d99a"],
-   borderRadius:5
-  }]
- });
-
- makeChart("demandChart","doughnut",{
-  labels:["Residential","Commercial/public","Electrification allowance"],
-  datasets:[{
-   data:[m.residential,m.commercialDemand,m.electrificationDemand],
-   backgroundColor:["#39a7ff","#ffb454","#ad91ff"],
-   borderWidth:0
-  }]
- },{plugins:{legend:{position:"bottom",labels:{color:"#c4d4e5",font:{size:9},boxWidth:10}}}});
-
- const monthly=[.075,.078,.085,.083,.080,.078,.075,.075,.078,.087,.105,.101];
- makeChart("solarChart","line",{
-  labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
-  datasets:[{
-   label:"Illustrative PV generation (kWh)",
-   data:monthly.map(x=>x*m.generation),
-   borderColor:"#27d6d0",
-   backgroundColor:"rgba(39,214,208,.12)",
-   fill:true,
-   tension:.3
-  }]
- });
-}
-
-/* =========================================================
-   SELECTION EVENTS
-   ========================================================= */
-
-$("regionSelect").addEventListener("change",async()=>{
- state.selectedRegion=$("regionSelect").value;
- state.selectedDistrict="ALL";
- $("districtSelect").value="ALL";
- populateDistricts();
- redrawMap();
-
- state.buildings=null;
- buildingLayer.clearLayers();
+ updateAreaLabels(feature);
+ drawSelected(feature);
+ if(state.layers.buildings){map.removeLayer(state.layers.buildings);state.layers.buildings=null;}
+ state.buildingCount=0;state.buildings=null;
  $("kBuildings").textContent="—";
- status("sBuildings","Not loaded");
-
- await loadPopulation();
-});
-
-$("districtSelect").addEventListener("change",async()=>{
- state.selectedDistrict=$("districtSelect").value;
- redrawMap();
-
- state.buildings=null;
- buildingLayer.clearLayers();
- $("kBuildings").textContent="—";
- status("sBuildings","Not loaded");
-
- await loadPopulation();
-});
-
-$("yearSelect").addEventListener("change",async()=>{
- if(state.selectedFeature)await loadPopulation();
-});
-
-/* =========================================================
-   BUTTONS AND ONLINE DATA
-   ========================================================= */
-
-$("boundaryBtn").addEventListener("click",loadBoundaries);
-$("buildingBtn").addEventListener("click",loadBuildings);
+ setMessage("Retrieving population and mapped building footprints for "+featureName(feature)+"...");
+ const populationPromise=loadPopulation(feature);
+ const buildingPromise=loadBuildings(feature);
+ await Promise.allSettled([populationPromise,buildingPromise]);
+ if(runId!==activeRun)return;
+ calculateEnergy();
+ setMessage("Analysis completed for "+featureName(feature)+". Review the data-source status and scenario assumptions.");
+}
 $("runBtn").addEventListener("click",runAnalysis);
-
-$("fetchBtn").addEventListener("click",async()=>{
- setBusy("fetchBtn",true,"FETCHING ONLINE DATA...");
- try{
-  if(!state.national&&!state.regions&&!state.districts){
-   await loadBoundaries();
-  }else{
-   await loadPopulation();
-  }
-
-  if(state.selectedDistrict!=="ALL"){
-   await loadBuildings();
-  }else{
-   setMessage("Boundaries and population request completed. Select an individual district to retrieve buildings.");
-  }
- }finally{
-  setBusy("fetchBtn",false);
- }
+$("recalculateBtn").addEventListener("click",()=>{
+ calculateEnergy();
+ setMessage("Energy scenario recalculated using the current assumptions.");
+});
+$("yearSelect").addEventListener("change",()=>{
+ if(selectedFeature())runAnalysis();
+});
+$("resetBtn").addEventListener("click",async()=>{
+ $("regionSelect").value="";
+ state.selectedRegion=null;state.selectedDistrict=null;
+ $("districtSelect").value="";$("districtSelect").disabled=true;
+ if(state.layers.selected){map.removeLayer(state.layers.selected);state.layers.selected=null;}
+ if(state.layers.buildings){map.removeLayer(state.layers.buildings);state.layers.buildings=null;}
+ state.population=null;state.buildings=null;state.buildingCount=0;state.energy=null;
+ $("kPopulation").textContent="—";$("kBuildings").textContent="—";
+ clearEnergyKPIs();updateCharts(null);
+ updateAreaLabels(selectedFeature());fitNational();
+ setStatus("sPopulation","Waiting","waiting");
+ setStatus("sBuildings","Not requested","waiting");
+ setMessage("Selection reset. Select a region or district to start a new analysis.");
 });
 
-$("nationalZoom").addEventListener("click",()=>{
- if(state.national)zoomFeature(state.national.features[0],9);
- else map.setView([13.45,-15.45],8);
-});
-
-$("selectedZoom").addEventListener("click",()=>{
- zoomFeature(getSelectedFeature());
-});
-
-/* =========================================================
-   SLIDER LABELS AND INPUTS
-   ========================================================= */
-
-function updateLabels(){
- $("commercialLabel").textContent=$("commercial").value+"%";
- $("pvLabel").textContent=$("pvCoverage").value+"%";
- $("effLabel").textContent=$("efficiency").value+"%";
- $("batteryLabel").textContent=$("battery").value+" hours";
- $("electLabel").textContent=$("electrification").value+"%";
-}
-
-["commercial","pvCoverage","efficiency","battery","electrification"]
-.forEach(id=>{
- $(id).addEventListener("input",()=>{
-  updateLabels();
-  if(state.population!==null)runAnalysis();
- });
-});
-
-["hhSize","kwhHH","pvSize","solarYield"].forEach(id=>{
- $(id).addEventListener("change",()=>{
-  if(state.population!==null)runAnalysis();
- });
-});
-
-/* =========================================================
-   RESET
-   ========================================================= */
-
-$("resetBtn").addEventListener("click",()=>{
- $("hhSize").value=8;
- $("kwhHH").value=1200;
- $("commercial").value=25;
- $("pvCoverage").value=35;
- $("pvSize").value=3;
- $("solarYield").value=1700;
- $("efficiency").value=15;
- $("battery").value=4;
- $("electrification").value=20;
- updateLabels();
- runAnalysis();
-});
-
-/* =========================================================
-   EXPORTS
-   ========================================================= */
-
-function downloadFile(name,content,mime){
+/* ============================================================
+   EXPORT FUNCTIONS
+============================================================ */
+function downloadFile(filename,content,mime){
  const blob=new Blob([content],{type:mime});
  const url=URL.createObjectURL(blob);
  const a=document.createElement("a");
- a.href=url;
- a.download=name;
- document.body.appendChild(a);
- a.click();
- a.remove();
+ a.href=url;a.download=filename;
+ document.body.appendChild(a);a.click();a.remove();
  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-
-function exportData(){
- const m=state.energy||model();
+function exportRecord(){
+ const feature=selectedFeature();
  return {
-  application:"Gambia Urban Energy Intelligence",
-  producer:"Ansu Singhateh",
-  unit:"GIS / Cartography Unit, Gambia Bureau of Statistics",
-  selected_area:state.selectedName,
-  region:state.selectedRegion,
-  district:state.selectedDistrict,
+  application:"GBoS GEOAI | Gambia Urban Energy Intelligence",
+  produced_by:"Ansu Singhateh",
+  unit:"GIS / Cartography Unit | Gambia Bureau of Statistics",
+  area:feature?featureName(feature):"The Gambia",
   population_year:Number($("yearSelect").value),
-  population_source:"WorldPop Global2 R2025A API",
   population:state.population,
-  area_km2:state.area,
-  population_density:state.density,
-  estimated_households:m?m.households:null,
-  household_method:"Population divided by user-defined average household size",
-  household_size:Number($("hhSize").value),
-  energy_model:m,
-  buildings_features:state.buildings?.features?.length||0,
-  buildings_source:"OpenStreetMap Overpass API",
-  nawec_data_status:"Not connected; no NAWEC consumption values are represented",
-  disclaimer:"Scenario estimates only. Not official GBoS household totals, NAWEC meter readings, or certified PED indicators.",
-  generated_at:new Date().toISOString()
+  population_source:"WorldPop API; if unavailable, value is null",
+  household_estimate:state.energy?.households??null,
+  household_method:"Population divided by user-assumed average household size",
+  osm_building_features:state.buildingCount,
+  nawec_consumption:"Not connected; not estimated or represented as actual consumption",
+  assumptions:{
+   average_household_size:inputNumber("hhSize",1),
+   daily_kwh_per_household:inputNumber("dailyUse",0),
+   commercial_share_percent:inputNumber("commercialShare",0),
+   electrification_percent:inputNumber("electrification",0),
+   efficiency_improvement_percent:inputNumber("efficiency",0),
+   rooftop_solar_coverage_percent:inputNumber("pvCoverage",0),
+   pv_kwp_per_participating_household:inputNumber("pvSize",0),
+   solar_yield_kwh_per_kwp_day:inputNumber("solarYield",0),
+   battery_autonomy_hours:inputNumber("batteryHours",0)
+  },
+  energy_scenario:state.energy,
+  area_km2:state.areaKm2,
+  data_note:"Scenario estimates are not measured electricity consumption or certified PED results."
  };
 }
-
-$("jsonBtn").addEventListener("click",()=>{
- downloadFile(
-  "Gambia_Urban_Energy_Scenario.json",
-  JSON.stringify(exportData(),null,2),
-  "application/json"
- );
-});
-
 $("csvBtn").addEventListener("click",()=>{
- const d=exportData();
- const m=d.energy_model||{};
+ const r=exportRecord();
  const rows=[
   ["Indicator","Value","Unit / note"],
-  ["Selected area",d.selected_area,""],
-  ["Population",d.population,"persons"],
-  ["Population year",d.population_year,"year"],
-  ["Area",d.area_km2,"km2"],
-  ["Population density",d.population_density,"persons/km2"],
-  ["Estimated households",d.estimated_households,"modelled"],
-  ["Average household size",d.household_size,"persons"],
-  ["Baseline demand",m.baseline,"kWh/year"],
-  ["Demand after efficiency",m.demandAfterEfficiency,"kWh/year"],
-  ["PV capacity",m.capacity,"kWp"],
-  ["PV generation",m.generation,"kWh/year"],
-  ["Battery capacity",m.storage,"scenario kWh"],
-  ["Annual energy balance",m.balance,"kWh/year"],
-  ["OSM buildings",d.buildings_features,"mapped features"],
-  ["NAWEC consumption","Not connected","No verified data"]
+  ["Area",r.area,""],
+  ["Population",r.population??"Unavailable","persons"],
+  ["Estimated households",r.household_estimate??"Unavailable","modelled"],
+  ["OSM building features",r.osm_building_features,"mapped features"],
+  ["Area",r.area_km2??"Unavailable","km2"],
+  ["Daily electricity demand",state.energy?.totalDaily??"Unavailable","kWh/day"],
+  ["Annual electricity demand",state.energy?.annualKwh??"Unavailable","kWh/year"],
+  ["Potential PV generation",state.energy?.pvDailyKwh??"Unavailable","kWh/day"],
+  ["PV capacity",state.energy?.pvCapacityKwp??"Unavailable","kWp"],
+  ["Indicative battery storage",state.energy?.batteryKwh??"Unavailable","kWh"],
+  ["NAWEC consumption","Not connected","No measured data"]
  ];
  const csv=rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");
- downloadFile("Gambia_Urban_Energy_Analytics.csv",csv,"text/csv;charset=utf-8");
+ downloadFile("Gambia_Urban_Energy_Analysis.csv",csv,"text/csv;charset=utf-8");
+});
+$("jsonBtn").addEventListener("click",()=>{
+ downloadFile("Gambia_Urban_Energy_Analysis.json",JSON.stringify(exportRecord(),null,2),"application/json");
+});
+$("geoBtn").addEventListener("click",()=>{
+ const feature=selectedFeature();
+ if(!feature){setMessage("No selected area is available for GeoJSON export.");return;}
+ const output={
+  type:"FeatureCollection",
+  features:[{
+   ...feature,
+   properties:{
+    ...(feature.properties||{}),
+    analysis_area:featureName(feature),
+    population:state.population,
+    estimated_households:state.energy?.households??null,
+    osm_building_count:state.buildingCount,
+    area_km2:state.areaKm2
+   }
+  }]
+ };
+ downloadFile("Selected_Area_Energy_Intelligence.geojson",JSON.stringify(output,null,2),"application/geo+json");
 });
 
-$("buildingsExportBtn").addEventListener("click",()=>{
- if(!state.buildings){
-  setMessage("No buildings loaded. Select a district and fetch buildings first.");
-  return;
- }
- downloadFile("Gambia_OSM_Buildings.geojson",JSON.stringify(state.buildings), "application/geo+json");
-});
-
-$("boundariesExportBtn").addEventListener("click",()=>{
- const features=[
-  ...(state.national?.features||[]),
-  ...(state.regions?.features||[]),
-  ...(state.districts?.features||[])
- ];
- if(!features.length){
-  setMessage("No boundaries are available for export.");
-  return;
- }
- downloadFile(
-  "Gambia_Administrative_Boundaries.geojson",
-  JSON.stringify({type:"FeatureCollection",features}),
-  "application/geo+json"
- );
-});
-
-/* =========================================================
+/* ============================================================
    START APPLICATION
-   ========================================================= */
-
-updateLabels();
-$("appStatus").textContent="LOADING ADMINISTRATIVE DATA";
-
-/* Show the map immediately, before waiting for APIs. */
-setTimeout(()=>map.invalidateSize(),300);
-
-/* Boundaries load independently of the satellite basemap. */
-loadBoundaries().catch(error=>{
- console.error("Initialisation error:",error);
- $("appStatus").textContent="DATA CONNECTION ERROR";
- setMessage("Initialisation failed: "+error.message);
-});
-
+============================================================ */
+(async function init(){
+ $("districtSelect").disabled=true;
+ map.setView([13.45,-15.5],8);
+ await loadBoundaries();
+ updateAreaLabels(selectedFeature());
+ map.invalidateSize();
+})();
 </script>
 </body>
 </html>
+
